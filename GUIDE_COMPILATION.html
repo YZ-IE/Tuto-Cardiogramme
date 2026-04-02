@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guide de compilation — CardioLearn ECG APK</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #e6edf3; line-height: 1.6; }
+  .container { max-width: 860px; margin: 0 auto; padding: 40px 24px; }
+  h1 { font-size: 28px; color: #fff; margin-bottom: 8px; }
+  .subtitle { color: #8b949e; margin-bottom: 40px; font-size: 15px; }
+  .prereq-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin: 20px 0 32px; }
+  .prereq { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+  .prereq-icon { font-size: 24px; margin-bottom: 8px; }
+  .prereq h3 { color: #58a6ff; font-size: 14px; margin-bottom: 6px; }
+  .prereq p { color: #8b949e; font-size: 13px; }
+  .prereq a { color: #58a6ff; text-decoration: none; }
+  .step { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px 24px; margin-bottom: 16px; }
+  .step-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .step-num { background: #1f6feb; color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 15px; flex-shrink: 0; }
+  .step-title { font-size: 17px; font-weight: 600; color: #fff; }
+  .step-desc { color: #8b949e; font-size: 13px; margin-top: 2px; }
+  .cmd-block { background: #010409; border: 1px solid #30363d; border-radius: 6px; padding: 14px 16px; margin: 10px 0; font-family: 'Courier New', monospace; font-size: 13px; overflow-x: auto; position: relative; }
+  .cmd-block code { color: #79c0ff; }
+  .cmd-block .comment { color: #6e7681; }
+  .tip { background: #0d2137; border: 1px solid #1f6feb44; border-left: 3px solid #1f6feb; border-radius: 6px; padding: 12px 16px; margin: 10px 0; font-size: 13px; color: #79c0ff; }
+  .warn { background: #291d00; border: 1px solid #bb800044; border-left: 3px solid #d29922; border-radius: 6px; padding: 12px 16px; margin: 10px 0; font-size: 13px; color: #e3b341; }
+  .success { background: #0d2618; border: 1px solid #26a64144; border-left: 3px solid #26a641; border-radius: 6px; padding: 12px 16px; margin: 10px 0; font-size: 13px; color: #3fb950; }
+  .file-tree { background: #010409; border: 1px solid #30363d; border-radius: 6px; padding: 14px 16px; font-family: monospace; font-size: 13px; color: #8b949e; line-height: 1.8; }
+  .file-tree .dir { color: #79c0ff; }
+  .file-tree .file { color: #e6edf3; }
+  .file-tree .highlight { color: #3fb950; font-weight: bold; }
+  h2 { font-size: 22px; color: #fff; margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-blue { background: #1f6feb33; color: #58a6ff; border: 1px solid #1f6feb44; }
+  .badge-green { background: #26a64133; color: #3fb950; border: 1px solid #26a64144; }
+  .time-est { color: #8b949e; font-size: 12px; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🫀 CardioLearn ECG — Guide de compilation APK</h1>
+  <p class="subtitle">Guide complet pour compiler l'application Android à partir du code source</p>
+
+  <h2>📋 Prérequis — À installer avant de commencer</h2>
+  <div class="prereq-grid">
+    <div class="prereq">
+      <div class="prereq-icon">🟢</div>
+      <h3>Node.js LTS</h3>
+      <p>Version 18 ou 20. Télécharger sur <a href="https://nodejs.org" target="_blank">nodejs.org</a></p>
+    </div>
+    <div class="prereq">
+      <div class="prereq-icon">☕</div>
+      <h3>Java JDK 17</h3>
+      <p>JDK 17 (LTS). Télécharger sur <a href="https://adoptium.net" target="_blank">adoptium.net</a></p>
+    </div>
+    <div class="prereq">
+      <div class="prereq-icon">🤖</div>
+      <h3>Android Studio</h3>
+      <p>Version Hedgehog ou plus récente. Sur <a href="https://developer.android.com/studio" target="_blank">developer.android.com</a></p>
+    </div>
+    <div class="prereq">
+      <div class="prereq-icon">🧰</div>
+      <h3>Android SDK</h3>
+      <p>SDK 34 (Android 14). Installé automatiquement avec Android Studio.</p>
+    </div>
+  </div>
+
+  <div class="warn">⚠️ <strong>Important :</strong> Installer Node.js et le JDK <em>avant</em> Android Studio. Configurez les variables d'environnement JAVA_HOME et ANDROID_HOME si demandé.</div>
+
+  <h2>📁 Structure des fichiers fournis</h2>
+  <div class="file-tree">
+    <div><span class="dir">ecg-app/</span></div>
+    <div>&nbsp;&nbsp;<span class="highlight">├── package.json</span>         <span style="color:#6e7681">← dépendances du projet</span></div>
+    <div>&nbsp;&nbsp;<span class="highlight">├── capacitor.config.ts</span>  <span style="color:#6e7681">← config Capacitor (app ID, nom...)</span></div>
+    <div>&nbsp;&nbsp;<span class="highlight">├── vite.config.ts</span>       <span style="color:#6e7681">← config du build React</span></div>
+    <div>&nbsp;&nbsp;<span class="highlight">├── index.html</span>           <span style="color:#6e7681">← point d'entrée HTML</span></div>
+    <div>&nbsp;&nbsp;<span class="dir">└── src/</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">├── main.jsx</span>       <span style="color:#6e7681">← initialisation React</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">└── App.jsx</span>       <span style="color:#6e7681">← application ECG complète</span></div>
+  </div>
+  <p style="color:#8b949e; font-size:13px; margin-top:8px;">Le dossier <code style="color:#79c0ff">android/</code> sera généré automatiquement par Capacitor à l'étape 4.</p>
+
+  <h2>🚀 Étapes de compilation</h2>
+
+  <!-- ÉTAPE 1 -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Placer les fichiers et ouvrir un terminal</div>
+        <div class="step-desc time-est">⏱ ~2 min</div>
+      </div>
+    </div>
+    <p style="color:#8b949e; margin-bottom:10px;">Copier le dossier <code style="color:#79c0ff">ecg-app/</code> où vous voulez (ex: Bureau, Documents). Puis ouvrir un terminal dans ce dossier :</p>
+    <div class="tip">
+      💡 <strong>Windows :</strong> clic droit dans le dossier → "Ouvrir dans le terminal"<br>
+      💡 <strong>Mac/Linux :</strong> ouvrir Terminal et taper <code>cd ~/Bureau/ecg-app</code>
+    </div>
+    <div class="cmd-block"><code>cd ecg-app</code></div>
+  </div>
+
+  <!-- ÉTAPE 2 -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Installer les dépendances npm</div>
+        <div class="step-desc time-est">⏱ ~2-5 min (selon la connexion)</div>
+      </div>
+    </div>
+    <div class="cmd-block"><code>npm install</code></div>
+    <div class="tip">💡 Cette commande télécharge React, Capacitor, Vite et tous les outils nécessaires dans le dossier <code>node_modules/</code>. Un fichier <code>package-lock.json</code> est créé automatiquement.</div>
+  </div>
+
+  <!-- ÉTAPE 3 -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Builder l'application React (production)</div>
+        <div class="step-desc time-est">⏱ ~30-60 secondes</div>
+      </div>
+    </div>
+    <div class="cmd-block"><code>npm run build</code></div>
+    <p style="color:#8b949e; margin-top:10px;">Cette commande compile le code JSX en JavaScript optimisé et crée le dossier <code style="color:#79c0ff">dist/</code>. C'est ce dossier que Capacitor va intégrer dans l'APK.</p>
+    <div class="success">✅ Vous devriez voir : <code>dist/index.html</code>, <code>dist/assets/</code></div>
+  </div>
+
+  <!-- ÉTAPE 4 -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Initialiser et ajouter la plateforme Android</div>
+        <div class="step-desc time-est">⏱ ~2-4 min</div>
+      </div>
+    </div>
+    <div class="warn">⚠️ À faire <strong>une seule fois</strong>. Si le dossier <code>android/</code> existe déjà, passer à l'étape 5.</div>
+    <div class="cmd-block">
+      <code>npx cap init "CardioLearn ECG" "com.cardiolearn.ecg" --web-dir dist</code>
+    </div>
+    <div style="margin: 8px 0; color: #8b949e; text-align: center; font-size: 13px;">puis</div>
+    <div class="cmd-block"><code>npx cap add android</code></div>
+    <div class="tip">💡 Capacitor crée le dossier <code>android/</code> — c'est un projet Android Studio complet. Ne pas le modifier manuellement sauf si vous savez ce que vous faites.</div>
+  </div>
+
+  <!-- ÉTAPE 5 -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div>
+        <div class="step-title">Synchroniser le build dans le projet Android</div>
+        <div class="step-desc time-est">⏱ ~15 secondes</div>
+      </div>
+    </div>
+    <p style="color:#8b949e; margin-bottom:10px;"><strong>À chaque modification du code</strong>, exécuter :</p>
+    <div class="cmd-block"><code>npx cap sync android</code></div>
+    <p style="color:#8b949e; margin-top:10px;">Cette commande copie le contenu de <code>dist/</code> dans le projet Android et met à jour les plugins Capacitor.</p>
+  </div>
+
+  <!-- ÉTAPE 6 -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">6</div>
+      <div>
+        <div class="step-title">Ouvrir Android Studio et compiler l'APK</div>
+        <div class="step-desc time-est">⏱ ~5-15 min</div>
+      </div>
+    </div>
+    <div class="cmd-block"><code>npx cap open android</code></div>
+    <p style="color:#8b949e; margin: 12px 0 8px;">Dans Android Studio :</p>
+    <ol style="color:#8b949e; font-size:13px; padding-left:20px; line-height:2.2;">
+      <li>Attendre la fin de la synchronisation Gradle (barre de progression en bas)</li>
+      <li>Menu <strong style="color:#e6edf3">Build</strong> → <strong style="color:#e6edf3">Build Bundle(s) / APK(s)</strong> → <strong style="color:#e6edf3">Build APK(s)</strong></li>
+      <li>Attendre la compilation (~5-10 min la première fois)</li>
+      <li>Cliquer sur <strong style="color:#3fb950">"locate"</strong> dans la notification en bas à droite</li>
+    </ol>
+    <div class="success">✅ L'APK se trouve dans : <code>android/app/build/outputs/apk/debug/app-debug.apk</code></div>
+    <div class="tip">💡 Pour un APK <strong>release</strong> (signé, pour le Play Store), aller dans <em>Build → Generate Signed Bundle / APK</em> et créer un keystore.</div>
+  </div>
+
+  <!-- ÉTAPE 7 -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">7</div>
+      <div>
+        <div class="step-title">Installer l'APK sur votre Android</div>
+        <div class="step-desc time-est">⏱ ~2 min</div>
+      </div>
+    </div>
+    <p style="color:#8b949e; margin-bottom:10px;">Trois méthodes :</p>
+    <div class="tip">
+      <strong>📱 Méthode 1 — Via Android Studio (plus facile)</strong><br>
+      Brancher le téléphone en USB → activer le <em>débogage USB</em> dans les options développeur → cliquer sur le bouton ▶ "Run" dans Android Studio.
+    </div>
+    <div class="tip">
+      <strong>📂 Méthode 2 — Copier l'APK manuellement</strong><br>
+      Copier <code>app-debug.apk</code> sur le téléphone (câble USB, WhatsApp, email…) → ouvrir le fichier sur Android → "Installer" (autoriser les sources inconnues si demandé).
+    </div>
+    <div class="tip">
+      <strong>⚡ Méthode 3 — ADB (ligne de commande)</strong><br>
+      <code>adb install android/app/build/outputs/apk/debug/app-debug.apk</code>
+    </div>
+  </div>
+
+  <h2>🔄 Workflow de mise à jour</h2>
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num" style="background:#26a641">↑</div>
+      <div>
+        <div class="step-title">Après chaque modification du code source</div>
+      </div>
+    </div>
+    <div class="cmd-block">
+<code>npm run build</code>      <span class="comment"># recompile le React</span>
+<br><code>npx cap sync android</code>  <span class="comment"># synchronise dans Android Studio</span>
+    </div>
+    <p style="color:#8b949e; margin-top:10px;">Puis dans Android Studio : <strong style="color:#e6edf3">Build → Build APK(s)</strong> à nouveau.</p>
+  </div>
+
+  <h2>🐛 Problèmes fréquents</h2>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num" style="background:#da3633">!</div>
+      <div><div class="step-title">Erreur "JAVA_HOME not found"</div></div>
+    </div>
+    <p style="color:#8b949e; margin-bottom:10px;">Java n'est pas dans le PATH système. Solution :</p>
+    <div class="cmd-block">
+      <span class="comment"># Windows (PowerShell, adapter le chemin)</span><br>
+      <code>[System.Environment]::SetEnvironmentVariable("JAVA_HOME","C:\Program Files\Eclipse Adoptium\jdk-17.0.X.X-hotspot","Machine")</code><br><br>
+      <span class="comment"># Mac/Linux (ajouter dans ~/.bashrc ou ~/.zshrc)</span><br>
+      <code>export JAVA_HOME=/usr/lib/jvm/java-17-openjdk</code>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num" style="background:#da3633">!</div>
+      <div><div class="step-title">Erreur "SDK location not found"</div></div>
+    </div>
+    <div class="cmd-block">
+      <span class="comment"># Créer le fichier android/local.properties et y ajouter :</span><br>
+      <span class="comment"># Windows :</span><br>
+      <code>sdk.dir=C\:\\Users\\VOTRE_NOM\\AppData\\Local\\Android\\Sdk</code><br>
+      <span class="comment"># Mac :</span><br>
+      <code>sdk.dir=/Users/VOTRE_NOM/Library/Android/sdk</code>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num" style="background:#da3633">!</div>
+      <div><div class="step-title">Erreur Gradle lors du premier build</div></div>
+    </div>
+    <p style="color:#8b949e;">Dans Android Studio : <strong style="color:#e6edf3">File → Sync Project with Gradle Files</strong>. Si ça persiste : <strong style="color:#e6edf3">Build → Clean Project</strong> puis relancer le build.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num" style="background:#da3633">!</div>
+      <div><div class="step-title">L'assistant IA ne répond pas dans l'appli</div></div>
+    </div>
+    <p style="color:#8b949e;">L'API Anthropic nécessite une connexion internet. Vérifier que le téléphone a du réseau. Si l'erreur persiste en WiFi, le firewall ou le réseau bloque peut-être les requêtes vers <code style="color:#79c0ff">api.anthropic.com</code>.</p>
+  </div>
+
+  <h2>✅ Récapitulatif des commandes</h2>
+  <div class="cmd-block">
+<span class="comment"># Installation initiale (une seule fois)</span>
+<br><code>npm install</code>
+<br><code>npm run build</code>
+<br><code>npx cap init "CardioLearn ECG" "com.cardiolearn.ecg" --web-dir dist</code>
+<br><code>npx cap add android</code>
+<br><code>npx cap open android</code>
+<br>
+<br><span class="comment"># Mises à jour suivantes</span>
+<br><code>npm run build && npx cap sync android</code>
+  </div>
+
+  <div style="background:#0d2618; border:1px solid #26a64144; border-radius:10px; padding:20px 24px; margin-top:32px; text-align:center;">
+    <div style="font-size:32px; margin-bottom:8px;">🎉</div>
+    <div style="color:#3fb950; font-size:18px; font-weight:600; margin-bottom:6px;">Votre APK est prêt !</div>
+    <div style="color:#8b949e; font-size:14px;">CardioLearn ECG — Bases · Rythmes · Quiz · Actions infirmières · Assistant IA</div>
+  </div>
+</div>
+</body>
+</html>
